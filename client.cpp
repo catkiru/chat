@@ -18,14 +18,18 @@ int main(int argc, char *argv[]) {
     std::cout << "Connection to server succefully established" << std::endl;
 
     std::string message = "hello world";
+    while (true) {
+        std::cout << "Enter a messege" << std::endl;
+        std::cin >> message;
+        socket.write(message.c_str());
+        // socket.flush();
 
-    socket.write(message.c_str());
-    // socket.flush();
+        if (!socket.waitForBytesWritten(3000)) {
+            std::cerr << "Fail to send message" << std::endl;
+        } else {
+            std::cout << "Message sended" << std::endl;
+        }
 
-    if (!socket.waitForBytesWritten(3000)) {
-        std::cerr << "Fail to send message" << std::endl;
-    } else {
-        std::cout << "Message sended" << std::endl;
     }
 
     return 0;
