@@ -12,19 +12,30 @@ public:
 protected:
     void incomingConnection(qintptr handle) override {
         auto *socket = new QTcpSocket(this);
+        clients.append(socket);
+
         socket->setSocketDescriptor(handle);
         std::cout << "New connection: " << handle << std::endl;
 
-        connect(socket, &QTcpSocket::readyRead, [socket]() {
-            std::cout << "Incoming message: " << socket->readAll().toStdString() << std::endl;
+        connect(socket, &QTcpSocket::readyRead, [this, socket]() {
+            QByteArray data = socket->readAll();
+            std::cout << "Incoming:" << data.trimmed().toStdString() << std::endl;
+
+            for (QTcpSocket *client: clients) {
+                QByteArray reply = "OK:" + data;
+                client->write(reply);
+                client->flush();
+            }
         });
 
-        connect(socket, &QTcpSocket::disconnected, [socket]() {
+        connect(socket, &QTcpSocket::disconnected, [this, socket]() {
             std::cout << "Client disconnectd" << socket->socketDescriptor() << std::endl;
+            clients.removeAll(socket);
         });
-
-        socket->write("Hello client");
     }
+
+private:
+    QList<QTcpSocket *> clients;
 };
 
 int main(int argc, char *argv[]) {
@@ -36,8 +47,7 @@ int main(int argc, char *argv[]) {
     if (argc > 1) {
         try {
             port = std::stoi(argv[1]);
-        }
-        catch (std::exception &e) {
+        } catch (std::exception &e) {
             std::cerr << "Exception: " << e.what() << std::endl;
         }
         catch (...) {
