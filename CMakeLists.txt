@@ -23,7 +23,16 @@ target_link_libraries(chat
         Qt::Network
 )
 
+add_executable(chatClient client.cpp)
+target_link_libraries(chatClient
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+        Qt::Network
+)
+
 target_include_directories(chat PRIVATE ${Qt6Core_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS})
+target_include_directories(chatClient PRIVATE ${Qt6Core_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS})
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(DEBUG_SUFFIX)
