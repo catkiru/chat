@@ -15,7 +15,10 @@ find_package(Qt6 COMPONENTS
         Network
         REQUIRED)
 
-add_executable(chat main.cpp)
+add_executable(chat main.cpp
+        ChatMessage.cpp
+        ChatMessage.h
+)
 target_link_libraries(chat
         Qt::Core
         Qt::Gui
@@ -23,7 +26,9 @@ target_link_libraries(chat
         Qt::Network
 )
 
-add_executable(chatClient client.cpp)
+add_executable(chatClient client.cpp
+        ChatMessage.cpp
+        ChatMessage.h)
 target_link_libraries(chatClient
         Qt::Core
         Qt::Gui

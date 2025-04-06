@@ -4,6 +4,8 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
+#include "ChatMessage.h"
+
 
 class ChatServer : public QTcpServer {
 public:
@@ -19,7 +21,19 @@ protected:
 
         connect(socket, &QTcpSocket::readyRead, [this, socket]() {
             QByteArray data = socket->readAll();
-            std::cout << "Incoming:" << data.trimmed().toStdString() << std::endl;
+
+            ChatMessage msg = ChatMessage::fromJson(data);
+            switch (msg.type) {
+                case TextMessage:
+                    std::cout << "Incoming message:" << msg.body.toStdString() << std::endl;
+                    break;
+                case Auth:
+                    std::cout << "Welcome:" << msg.body.toStdString() << std::endl;
+                    break;
+                case Image:
+                    std::cerr << "Not implementing yet" << std::endl;
+                    break;
+            }
 
             for (QTcpSocket *client: clients) {
                 QByteArray reply = "OK:" + data;
@@ -39,6 +53,8 @@ private:
 };
 
 int main(int argc, char *argv[]) {
+    system("chcp 65001");
+
     std::cout << "Starting server" << std::endl;
     QApplication a(argc, argv);
 
