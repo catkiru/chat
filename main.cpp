@@ -26,19 +26,27 @@ protected:
             switch (msg.type) {
                 case TextMessage:
                     std::cout << "Incoming message:" << msg.body.toStdString() << std::endl;
+                    for (QTcpSocket *client: clients) {
+                        QByteArray reply = (">> " + msg.body).toUtf8();
+                        client->write(reply);
+                        client->flush();
+                    }
                     break;
                 case Auth:
+                    if (msg.password == "123") {
+                        socket->write("You logged in");
+                        socket->flush();
+                    } else {
+                        socket->write("Password incorect");
+                        socket->flush();
+                        std::cerr << "invalid password";
+                    }
+
                     std::cout << "Welcome:" << msg.body.toStdString() << std::endl;
                     break;
                 case Image:
                     std::cerr << "Not implementing yet" << std::endl;
                     break;
-            }
-
-            for (QTcpSocket *client: clients) {
-                QByteArray reply = "OK:" + data;
-                client->write(reply);
-                client->flush();
             }
         });
 

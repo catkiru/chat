@@ -6,9 +6,10 @@
 #include "ChatMessage.h"
 
 class ChatClient {
-    QTcpSocket socket;
-
 private:
+    QTcpSocket socket;
+    bool isLogedIn = false;
+
     void sendMessage(const ChatMessage &msg) {
         QMetaObject::invokeMethod(&socket, [this, msg]() {
             socket.write(msg.toJson());
@@ -20,11 +21,17 @@ public:
     void sendLogin(const std::string &login, const std::string &password) {
         ChatMessage msg;
         msg.type = Auth;
-        msg.body = QString::fromStdString(login) + ":" + QString::fromStdString(password);
+        msg.login = QString::fromStdString(login);
+        msg.password = QString::fromStdString(password);
         sendMessage(msg);
     }
 
     void sendTextMessage(const std::string &message) {
+        if (!isLogedIn) {
+            std::cerr << "Login first!" << std::endl;
+            return;
+        }
+
         ChatMessage msg;
         msg.type = TextMessage;
         msg.body = QString::fromStdString(message);
@@ -32,8 +39,12 @@ public:
     }
 
     void incomingMessage(const std::string &incoming) {
+        if (QString::fromStdString(incoming) == "You logged in") {
+            isLogedIn = true;
+        }
+
         std::cout << std::endl << "Incoming: " << incoming << std::endl;
-        std::cout << "type something: " << std::flush;
+        std::cout << "incoming says: type something: " << std::flush;
     }
 
     bool connect() {
@@ -49,7 +60,7 @@ public:
 
         std::cout << "Connection to server succefully established" << std::endl;
 
-        sendLogin("katya", "strong_password123");
+        sendLogin("katya", "123");
 
         QObject::connect(&socket, &QTcpSocket::readyRead, [this]() {
             incomingMessage(socket.readAll().toStdString());
@@ -59,7 +70,6 @@ public:
         std::thread inputThread([this]() {
             std::string input;
             while (true) {
-                std::cout << "type something: " << std::flush;
                 std::getline(std::cin, input);
                 sendTextMessage(input);
             }

@@ -18,6 +18,8 @@ public:
 
     ChatMessageType type;
     QString body;
+    QString login;
+    QString password;
 
     QByteArray toJson() const;
 
