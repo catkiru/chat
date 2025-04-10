@@ -27,11 +27,6 @@ public:
     }
 
     void sendTextMessage(const std::string &message) {
-        if (!isLogedIn) {
-            std::cerr << "Login first!" << std::endl;
-            return;
-        }
-
         ChatMessage msg;
         msg.type = TextMessage;
         msg.body = QString::fromStdString(message);
@@ -60,7 +55,7 @@ public:
 
         std::cout << "Connection to server succefully established" << std::endl;
 
-        sendLogin("katya", "123");
+        // sendLogin("katya", "123");
 
         QObject::connect(&socket, &QTcpSocket::readyRead, [this]() {
             incomingMessage(socket.readAll().toStdString());
@@ -71,7 +66,25 @@ public:
             std::string input;
             while (true) {
                 std::getline(std::cin, input);
-                sendTextMessage(input);
+                if (input == "") {
+                    continue;
+                }
+
+                if (!isLogedIn) {
+                    if (input == "login") {
+                        std::string login;
+                        std::string pass;
+                        std::cout << "input login:";
+                        std::cin >> login;
+                        std::cout << "input pass:";
+                        std::cin >> pass;
+                        sendLogin(login, pass);
+                    } else {
+                        std::cerr << "Login first!" << std::endl;
+                    }
+                } else {
+                    sendTextMessage(input);
+                }
             }
         });
         inputThread.detach();
