@@ -5,6 +5,7 @@
 #include <QTcpSocket>
 
 #include "ChatMessage.h"
+#include "UserInfo.h"
 
 
 class ChatServer : public QTcpServer {
@@ -14,7 +15,8 @@ public:
 protected:
     void incomingConnection(qintptr handle) override {
         auto *socket = new QTcpSocket(this);
-        clients.append(socket);
+
+        clients[socket] = nullptr;
 
         socket->setSocketDescriptor(handle);
         std::cout << "New connection: " << handle << std::endl;
@@ -26,16 +28,23 @@ protected:
             switch (msg.type) {
                 case TextMessage:
                     std::cout << "Incoming message:" << msg.body.toStdString() << std::endl;
-                    for (QTcpSocket *client: clients) {
-                        QByteArray reply = (">> " + msg.body).toUtf8();
-                        client->write(reply);
-                        client->flush();
+                    UserInfo *info;
+                    info = clients[socket];
+                    for (auto it = clients.begin(); it != clients.end(); ++it) {
+                        if (it.key() != socket) {
+                            QByteArray reply = (info->login + " says: >> " + msg.body).toUtf8();
+                            it.key()->write(reply);
+                            it.key()->flush();
+                        }
                     }
                     break;
                 case Auth:
                     if (msg.password == "123") {
                         socket->write("You logged in");
                         socket->flush();
+                        auto info2 = new UserInfo();
+                        info2->login = msg.login;
+                        clients[socket] = info2;
                     } else {
                         socket->write("Password incorect");
                         socket->flush();
@@ -52,12 +61,13 @@ protected:
 
         connect(socket, &QTcpSocket::disconnected, [this, socket]() {
             std::cout << "Client disconnectd" << socket->socketDescriptor() << std::endl;
-            clients.removeAll(socket);
+            // освободить память
+            clients.remove(socket);
         });
     }
 
 private:
-    QList<QTcpSocket *> clients;
+    QHash<QTcpSocket *, UserInfo *> clients;
 };
 
 int main(int argc, char *argv[]) {

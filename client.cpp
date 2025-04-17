@@ -55,8 +55,6 @@ public:
 
         std::cout << "Connection to server succefully established" << std::endl;
 
-        // sendLogin("katya", "123");
-
         QObject::connect(&socket, &QTcpSocket::readyRead, [this]() {
             incomingMessage(socket.readAll().toStdString());
         });

@@ -7,6 +7,12 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
+ChatMessage::ChatMessage(ChatMessageType type, const QString &body, const QString &login, const QString &password) {
+    this->type = type;
+    this->body = body;
+    this->login = login;
+    this->password = password;
+}
 
 QByteArray ChatMessage::toJson() const {
     QJsonObject obj;
@@ -19,12 +25,11 @@ QByteArray ChatMessage::toJson() const {
 }
 
 ChatMessage ChatMessage::fromJson(const QByteArray &data) {
-    ChatMessage result;
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonObject obj = doc.object();
-    result.type = (ChatMessageType)obj["type"].toInt();
-    result.body = obj["body"].toString();
-    result.login = obj["login"].toString();
-    result.password = obj["password"].toString();
-    return result;
+    auto type = (ChatMessageType) obj["type"].toInt();
+    auto body = obj["body"].toString();
+    auto login = obj["login"].toString();
+    auto password = obj["password"].toString();
+    return ChatMessage(type, body, login, password);
 }

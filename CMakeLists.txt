@@ -18,6 +18,8 @@ find_package(Qt6 COMPONENTS
 add_executable(chat main.cpp
         ChatMessage.cpp
         ChatMessage.h
+        UserInfo.cpp
+        UserInfo.h
 )
 target_link_libraries(chat
         Qt::Core

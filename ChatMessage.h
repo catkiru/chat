@@ -13,6 +13,8 @@ enum ChatMessageType {
 };
 
 class ChatMessage {
+    ChatMessage(ChatMessageType type, const QString & body, const QString & chars, const QString & string);
+
 public:
     inline static const QString message_type = "message_type";
 
