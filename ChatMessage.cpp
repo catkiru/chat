@@ -14,6 +14,14 @@ ChatMessage::ChatMessage(ChatMessageType type, const QString &body, const QStrin
     this->password = password;
 }
 
+ChatMessage::ChatMessage(ChatMessageType type, const QString &body)
+    : ChatMessage(type, body, "", "") {
+}
+
+ChatMessage::ChatMessage(ChatMessageType type, const QString &login, const QString &password)
+    : ChatMessage(type, "", login, password) {
+}
+
 QByteArray ChatMessage::toJson() const {
     QJsonObject obj;
     obj["type"] = type;

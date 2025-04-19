@@ -30,7 +30,16 @@ target_link_libraries(chat
 
 add_executable(chatClient client.cpp
         ChatMessage.cpp
-        ChatMessage.h)
+        ChatMessage.h
+        chatwindow.cpp
+        chatwindow.h
+        chatwindow.ui
+        authform.cpp
+        authform.h
+        authform.ui
+        ChatClient.cpp
+        ChatClient.h
+)
 target_link_libraries(chatClient
         Qt::Core
         Qt::Gui
