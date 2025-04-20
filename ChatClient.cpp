@@ -43,6 +43,11 @@ void ChatClient::incomingMessage(const ChatMessage msg) {
             break;
         case TextMessage:
             emit textMessage(msg.from, msg.body, msg.image);
+        case History:
+            for (const auto &m: msg.history) {
+                emit textMessage(m.from, m.body, m.image);
+            }
+            break;
         default:
             break;
     }

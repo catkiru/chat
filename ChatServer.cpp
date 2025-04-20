@@ -15,7 +15,8 @@ ChatServer::ChatServer() {
 }
 
 void ChatServer::sendMessage(QTcpSocket *socket, const ChatMessage &msg) {
-    socket->write(msg.toJson());
+    auto json = msg.toJson();
+    socket->write(json);
     socket->flush();
 }
 
@@ -103,6 +104,34 @@ bool ChatServer::connectToDatabase() {
     }
 }
 
+void ChatServer::sendHistory(QTcpSocket *socket) {
+    QSqlQuery query(db);
+    query.prepare(" select from_login, send_at, body, image from chat.msg order by send_at desc limit 10; ");
+
+    std::cout << "SQL:" << query.lastQuery().toStdString() << std::endl;
+
+    if (!query.exec()) {
+        std::cerr << "PostgreSQL error: " << query.lastError().nativeErrorCode().toStdString() << std::endl;
+        std::cerr << "Error text: " << query.lastError().text().toStdString() << std::endl;
+    }
+
+    QList<ChatMessage> history;
+
+    while (query.next()) {
+        auto login = query.value("from_login").toString();
+        auto body = query.value("body").toString();
+        auto image = query.value("image").toByteArray();
+        ChatMessage cm(TextMessage, body);
+        cm.image = image;
+        cm.login = login;
+        history.append(cm);
+    }
+
+    ChatMessage chatHistory(History);
+    chatHistory.history = history;
+    sendMessage(socket, chatHistory);
+}
+
 void ChatServer::incomingConnection(qintptr handle) {
     auto *socket = new QTcpSocket(this);
 
@@ -122,6 +151,7 @@ void ChatServer::incomingConnection(qintptr handle) {
                     auto info2 = new UserInfo();
                     info2->login = msg.login;
                     clients[socket] = info2;
+                    sendHistory(socket);
                 } else {
                     sendAuthResult(socket, false);
                 }
@@ -144,6 +174,7 @@ void ChatServer::incomingConnection(qintptr handle) {
                     auto info2 = new UserInfo();
                     info2->login = msg.login;
                     clients[socket] = info2;
+                    sendHistory(socket);
                 } else {
                     sendAuthResult(socket, false);
                     std::cerr << "invalid password";

@@ -12,15 +12,21 @@ enum ChatMessageType {
     Auth,
     Image,
     AuthResult,
-    Register
+    Register,
+    History
 };
 
 class ChatMessage {
-
 public:
-    ChatMessage(ChatMessageType type, const QString & body, const QString & chars, const QString & string);
-    ChatMessage(ChatMessageType type, const QString & body);
-    ChatMessage(ChatMessageType type, const QString & body, const QString & password);
+    ChatMessage(ChatMessageType type, const QString &body, const QString &login, const QString &password);
+
+    ChatMessage(ChatMessageType type, const QString &body);
+
+    ChatMessage(ChatMessageType type, const QString &login, const QString &password);
+
+    ChatMessage(ChatMessageType type);
+
+    static QJsonObject toJsonObject(const ChatMessage* msg);
 
     inline static const QString message_type = "message_type";
 
@@ -30,6 +36,7 @@ public:
     QString password;
     QString from;
     QByteArray image;
+    QList<ChatMessage> history;
 
     QByteArray toJson() const;
 
