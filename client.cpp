@@ -19,8 +19,7 @@ int main(int argc, char *argv[]) {
     auto authForm = new AuthForm(&client);
     authForm->exec();
 
-    auto chatWindow = new ChatWindow();
-    chatWindow->_client = &client;
+    auto chatWindow = new ChatWindow(&client);
     chatWindow->show();
 
     return a.exec();

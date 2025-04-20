@@ -22,7 +22,7 @@ class ChatWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit ChatWindow(QWidget *parent = nullptr);
+    explicit ChatWindow(ChatClient *client, QWidget *parent = nullptr);
 
     ChatClient *_client;
 
@@ -32,7 +32,9 @@ public:
 
 private:
     Ui::ChatWindow *ui;
-    public slots:
+
+public slots:
+    void onTextMessage(QString from, QString msg);
     void on_btnSend_clicked();
 };
 

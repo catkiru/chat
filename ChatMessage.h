@@ -4,12 +4,14 @@
 
 #ifndef CHATMESSAGE_H
 #define CHATMESSAGE_H
+#include <qjsonobject.h>
 #include <qstring.h>
 
 enum ChatMessageType {
     TextMessage,
     Auth,
-    Image
+    Image,
+    AuthResult
 };
 
 class ChatMessage {
@@ -25,6 +27,7 @@ public:
     QString body;
     QString login;
     QString password;
+    QString from;
 
     QByteArray toJson() const;
 

@@ -28,6 +28,7 @@ QByteArray ChatMessage::toJson() const {
     obj["body"] = body;
     obj["login"] = login;
     obj["password"] = password;
+    obj["from"] = from;
     QByteArray result = QJsonDocument(obj).toJson(QJsonDocument::Indented);
     return result;
 }
@@ -39,5 +40,8 @@ ChatMessage ChatMessage::fromJson(const QByteArray &data) {
     auto body = obj["body"].toString();
     auto login = obj["login"].toString();
     auto password = obj["password"].toString();
-    return ChatMessage(type, body, login, password);
+    auto from = obj["from"].toString();
+    auto result = ChatMessage(type, body, login, password);
+    result.from = from;
+    return result;
 }

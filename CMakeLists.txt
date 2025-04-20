@@ -20,6 +20,8 @@ add_executable(chat main.cpp
         ChatMessage.h
         UserInfo.cpp
         UserInfo.h
+        ChatServer.cpp
+        ChatServer.h
 )
 target_link_libraries(chat
         Qt::Core
