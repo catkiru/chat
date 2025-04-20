@@ -29,6 +29,7 @@ public:
     QString login;
     QString password;
     QString from;
+    QByteArray image;
 
     QByteArray toJson() const;
 

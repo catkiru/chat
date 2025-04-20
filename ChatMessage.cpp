@@ -29,6 +29,7 @@ QByteArray ChatMessage::toJson() const {
     obj["login"] = login;
     obj["password"] = password;
     obj["from"] = from;
+    obj["image"] = QString::fromUtf8(image.toBase64());
     QByteArray result = QJsonDocument(obj).toJson(QJsonDocument::Indented);
     return result;
 }
@@ -41,7 +42,9 @@ ChatMessage ChatMessage::fromJson(const QByteArray &data) {
     auto login = obj["login"].toString();
     auto password = obj["password"].toString();
     auto from = obj["from"].toString();
+    auto image = QByteArray::fromBase64(obj["image"].toString().toUtf8());
     auto result = ChatMessage(type, body, login, password);
     result.from = from;
+    result.image = image;
     return result;
 }

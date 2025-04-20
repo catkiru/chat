@@ -21,7 +21,7 @@ private:
     void sendMessage(const ChatMessage &msg);
 
 signals:
-    void textMessage(QString from, QString msg);
+    void textMessage(QString from, QString msg, QByteArray image);
 
     void loginResult(bool success);
 
@@ -30,7 +30,7 @@ public:
 
     void sendRegister(QString login, QString pass);
 
-    void sendTextMessage(const std::string &message);
+    void sendTextMessage(QString message, QByteArray image = nullptr);
 
     void incomingMessage(const ChatMessage msg);
 

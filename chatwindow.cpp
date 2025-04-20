@@ -9,6 +9,8 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QImageReader>
+#include <QFileDialog>
+#include <QBuffer>
 
 
 ChatWindow::ChatWindow(ChatClient *client, QWidget *parent) : QMainWindow(parent), ui(new Ui::ChatWindow) {
@@ -24,10 +26,32 @@ ChatWindow::~ChatWindow() {
 void ChatWindow::on_btnSend_clicked() {
     auto msg = ui->txt_message->text();
     ui->txt_message->setText("");
-    _client->sendTextMessage(msg.toStdString());
+
+    QPixmap pixmap = ui->imagePreviewLabel->pixmap();
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    buffer.open(QIODevice::WriteOnly);
+    pixmap.save(&buffer, "PNG");
+    ui->imagePreviewLabel->clear();
+
+    _client->sendTextMessage(msg, byteArray);
 }
 
-void ChatWindow::onTextMessage(QString from, QString msg) {
+void ChatWindow::on_btnSelectImage_clicked() {
+    QString fileName = QFileDialog::getOpenFileName(this,
+    "Выберите изображение", "", "Изображения (*.png *.jpg *.jpeg *.bmp)");
+
+    if (!fileName.isEmpty()) {
+        QPixmap pixmap(fileName);
+        if (!pixmap.isNull()) {
+            ui->imagePreviewLabel->setPixmap(pixmap.scaled(ui->imagePreviewLabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        } else {
+            ui->imagePreviewLabel->setText("Не удалось загрузить изображение.");
+        }
+    }
+}
+
+void ChatWindow::onTextMessage(QString from, QString msg, QByteArray image) {
     QWidget *messageWidget = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout(messageWidget);
     layout->setContentsMargins(5, 5, 5, 5);
@@ -35,11 +59,9 @@ void ChatWindow::onTextMessage(QString from, QString msg) {
     QLabel *fromLabel = new QLabel(from);
     QLabel *msgLabel = new QLabel(msg);
     QLabel *imageLabel = new QLabel();
-
-    // QString imagePath = R"(C:\Qt\img.jpg)";
-    // auto pix = QPixmap(imagePath).scaledToWidth(200, Qt::SmoothTransformation);
-    // imageLabel->setPixmap(pix);
-
+    QPixmap pixmap;
+    pixmap.loadFromData(image);
+    imageLabel->setPixmap(pixmap);
     layout->addWidget(fromLabel);
     layout->addWidget(msgLabel);
     layout->addWidget(imageLabel);

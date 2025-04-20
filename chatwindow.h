@@ -34,8 +34,9 @@ private:
     Ui::ChatWindow *ui;
 
 public slots:
-    void onTextMessage(QString from, QString msg);
+    void onTextMessage(QString from, QString msg, QByteArray image);
     void on_btnSend_clicked();
+    void on_btnSelectImage_clicked();
 };
 
 

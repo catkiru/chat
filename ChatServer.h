@@ -16,10 +16,10 @@ class ChatServer : public QTcpServer {
 private:
     void sendMessage(QTcpSocket *socket, const ChatMessage &msg);
     void sendAuthResult(QTcpSocket *socket, bool authResult);
-    void sendTextMessage(QTcpSocket *socket, QString from, QString message);
+    void sendTextMessage(QTcpSocket *socket, QString from, QString message, QByteArray image);
     bool authUser(QString login, QString password);
     bool registerUser(QString login, QString password);
-    void saveMessage(QString login, QString body);
+    void saveMessage(QString login, QString body, QByteArray image);
     bool connectToDatabase();
 
     QHash<QTcpSocket *, UserInfo *> clients;

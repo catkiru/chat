@@ -24,9 +24,10 @@ void ChatServer::sendAuthResult(QTcpSocket *socket, bool authResult) {
     sendMessage(socket, msg);
 }
 
-void ChatServer::sendTextMessage(QTcpSocket *socket, QString from, QString message) {
+void ChatServer::sendTextMessage(QTcpSocket *socket, QString from, QString message, QByteArray image) {
     auto msg = ChatMessage(TextMessage, message);
     msg.from = from;
+    msg.image = image;
     sendMessage(socket, msg);
 }
 
@@ -72,11 +73,12 @@ bool ChatServer::registerUser(QString login, QString password) {
     return true;
 }
 
-void ChatServer::saveMessage(QString login, QString body) {
+void ChatServer::saveMessage(QString login, QString body, QByteArray image) {
     QSqlQuery query(db);
-    query.prepare("INSERT INTO chat.msg (from_login, body) VALUES (:login, :body)");
+    query.prepare("INSERT INTO chat.msg (from_login, body, image) VALUES (:login, :body, :image)");
     query.bindValue(":login", login);
     query.bindValue(":body", body);
+    query.bindValue(":image", image);
 
     if (!query.exec()) {
         std::cerr << "PostgreSQL error: " << query.lastError().nativeErrorCode().toStdString() << std::endl;
@@ -128,10 +130,10 @@ void ChatServer::incomingConnection(qintptr handle) {
                 std::cout << "Incoming message:" << msg.body.toStdString() << std::endl;
                 UserInfo *info;
                 info = clients[socket];
-                saveMessage(info->login, msg.body);
+                saveMessage(info->login, msg.body, msg.image);
                 for (auto it = clients.begin(); it != clients.end(); ++it) {
                     if (it.key() != socket || true) {
-                        sendTextMessage(socket, info->login, msg.body);
+                        sendTextMessage(socket, info->login, msg.body, msg.image);
                         sendAuthResult(socket, true);
                     }
                 }

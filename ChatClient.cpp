@@ -23,10 +23,11 @@ void ChatClient::sendRegister(QString login, QString pass) {
     sendMessage(msg);
 }
 
-void ChatClient::sendTextMessage(const std::string &message) {
+void ChatClient::sendTextMessage(QString message, QByteArray image) {
     auto type = TextMessage;
-    auto body = QString::fromStdString(message);
+    auto body = message;
     auto msg = ChatMessage(type, body);
+    msg.image = image;
     sendMessage(msg);
 }
 
@@ -41,7 +42,7 @@ void ChatClient::incomingMessage(const ChatMessage msg) {
             }
             break;
         case TextMessage:
-            emit textMessage(msg.from, msg.body);
+            emit textMessage(msg.from, msg.body, msg.image);
         default:
             break;
     }
