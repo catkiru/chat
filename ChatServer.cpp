@@ -123,8 +123,8 @@ void ChatServer::sendHistory(QTcpSocket *socket) {
         auto image = query.value("image").toByteArray();
         ChatMessage cm(TextMessage, body);
         cm.image = image;
-        cm.login = login;
-        history.append(cm);
+        cm.from = login;
+        history.prepend(cm);
     }
 
     ChatMessage chatHistory(History);
