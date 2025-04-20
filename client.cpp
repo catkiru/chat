@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
 
     auto authForm = new AuthForm(&client);
     authForm->exec();
+    delete authForm;
 
     auto chatWindow = new ChatWindow(&client);
     chatWindow->show();

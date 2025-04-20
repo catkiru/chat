@@ -33,6 +33,17 @@ void AuthForm::on_buttonBox_accepted() {
     }
 }
 
+void AuthForm::on_registerButton_clicked() {
+    QString host = ui->txt_serverHost->text();
+    if (_client->connect(host)) {
+        auto login = ui->txt_login->text();
+        auto pass = ui->txt_password->text();
+        _client->sendRegister(login, pass);
+    } else {
+        QMessageBox::warning(this, "Ошибка", "Не удалось подключиться к серверу");
+    }
+}
+
 void AuthForm::onLoginResult(bool success) {
     if (success) {
         accept();

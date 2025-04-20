@@ -18,6 +18,8 @@ private:
     void sendAuthResult(QTcpSocket *socket, bool authResult);
     void sendTextMessage(QTcpSocket *socket, QString from, QString message);
     bool authUser(QString login, QString password);
+    bool registerUser(QString login, QString password);
+    void saveMessage(QString login, QString body);
     bool connectToDatabase();
 
     QHash<QTcpSocket *, UserInfo *> clients;

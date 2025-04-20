@@ -11,7 +11,8 @@ enum ChatMessageType {
     TextMessage,
     Auth,
     Image,
-    AuthResult
+    AuthResult,
+    Register
 };
 
 class ChatMessage {

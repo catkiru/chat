@@ -8,6 +8,7 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QCryptographicHash>
 
 ChatServer::ChatServer() {
     connectToDatabase();
@@ -30,12 +31,11 @@ void ChatServer::sendTextMessage(QTcpSocket *socket, QString from, QString messa
 }
 
 bool ChatServer::authUser(QString login, QString password) {
-    std::cout << "Драйвер базы:" << db.driverName().toStdString() << std::endl;
-
+    QString hash = QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
     QSqlQuery query(db);
-    query.prepare("SELECT id FROM chat.users WHERE login = :login AND password_hash = :password");
+    query.prepare("SELECT login FROM chat.users WHERE login = :login AND password_hash = :password");
     query.bindValue(":login", login);
-    query.bindValue(":password", password);
+    query.bindValue(":password", hash);
 
 
     std::cout << "SQL:" << query.lastQuery().toStdString() << std::endl;
@@ -51,6 +51,36 @@ bool ChatServer::authUser(QString login, QString password) {
         return true;
     } else {
         return false;
+    }
+}
+
+bool ChatServer::registerUser(QString login, QString password) {
+    // Хэшируем пароль перед сохранением
+    QString hash = QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
+
+    QSqlQuery query(db);
+    query.prepare("INSERT INTO chat.users (login, user_name, password_hash) VALUES (:login, :login, :password)");
+    query.bindValue(":login", login);
+    query.bindValue(":password", hash);
+
+    if (!query.exec()) {
+        std::cerr << "PostgreSQL error: " << query.lastError().nativeErrorCode().toStdString() << std::endl;
+        std::cerr << "Error text: " << query.lastError().text().toStdString() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+void ChatServer::saveMessage(QString login, QString body) {
+    QSqlQuery query(db);
+    query.prepare("INSERT INTO chat.msg (from_login, body) VALUES (:login, :body)");
+    query.bindValue(":login", login);
+    query.bindValue(":body", body);
+
+    if (!query.exec()) {
+        std::cerr << "PostgreSQL error: " << query.lastError().nativeErrorCode().toStdString() << std::endl;
+        std::cerr << "Error text: " << query.lastError().text().toStdString() << std::endl;
     }
 }
 
@@ -84,13 +114,25 @@ void ChatServer::incomingConnection(qintptr handle) {
 
         ChatMessage msg = ChatMessage::fromJson(data);
         switch (msg.type) {
+            case Register:
+                if (registerUser(msg.login, msg.password)) {
+                    sendAuthResult(socket, true);
+                    auto info2 = new UserInfo();
+                    info2->login = msg.login;
+                    clients[socket] = info2;
+                } else {
+                    sendAuthResult(socket, false);
+                }
+                break;
             case TextMessage:
                 std::cout << "Incoming message:" << msg.body.toStdString() << std::endl;
                 UserInfo *info;
                 info = clients[socket];
+                saveMessage(info->login, msg.body);
                 for (auto it = clients.begin(); it != clients.end(); ++it) {
                     if (it.key() != socket || true) {
                         sendTextMessage(socket, info->login, msg.body);
+                        sendAuthResult(socket, true);
                     }
                 }
                 break;

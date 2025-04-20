@@ -22,11 +22,13 @@ private:
 
 signals:
     void textMessage(QString from, QString msg);
-    void loginResult(bool success);
 
+    void loginResult(bool success);
 
 public:
     void sendLogin(const std::string &login, const std::string &password);
+
+    void sendRegister(QString login, QString pass);
 
     void sendTextMessage(const std::string &message);
 

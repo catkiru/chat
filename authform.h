@@ -31,6 +31,7 @@ public:
 
 public slots:
     void on_buttonBox_accepted();
+    void on_registerButton_clicked();
 
     void onLoginResult(bool success);
 

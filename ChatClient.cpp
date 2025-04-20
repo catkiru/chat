@@ -18,6 +18,11 @@ void ChatClient::sendLogin(const std::string &login, const std::string &password
     sendMessage(ChatMessage(type, loginStr, passwordStr));
 }
 
+void ChatClient::sendRegister(QString login, QString pass) {
+    auto msg = ChatMessage(Register, login, pass);
+    sendMessage(msg);
+}
+
 void ChatClient::sendTextMessage(const std::string &message) {
     auto type = TextMessage;
     auto body = QString::fromStdString(message);
@@ -43,6 +48,7 @@ void ChatClient::incomingMessage(const ChatMessage msg) {
 }
 
 bool ChatClient::connect(QString &host) {
+    socket.disconnect();
     QTextStream in(stdin);
     QTextStream out(stdout);
 
