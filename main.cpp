@@ -1,19 +1,16 @@
 #include <iostream>
 #include <QApplication>
-#include <QPushButton>
-#include <QTcpServer>
-#include <QTcpSocket>
 
 #include "ChatMessage.h"
 #include "ChatServer.h"
-#include "UserInfo.h"
-
 
 int main(int argc, char *argv[]) {
     system("chcp 65001");
 
     std::cout << "Starting server" << std::endl;
     QApplication a(argc, argv);
+
+
 
     int port = 1234;
 

@@ -5,6 +5,13 @@
 #include "ChatServer.h"
 
 #include <iostream>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
+
+ChatServer::ChatServer() {
+    connectToDatabase();
+}
 
 void ChatServer::sendMessage(QTcpSocket *socket, const ChatMessage &msg) {
     socket->write(msg.toJson());
@@ -20,6 +27,48 @@ void ChatServer::sendTextMessage(QTcpSocket *socket, QString from, QString messa
     auto msg = ChatMessage(TextMessage, message);
     msg.from = from;
     sendMessage(socket, msg);
+}
+
+bool ChatServer::authUser(QString login, QString password) {
+    std::cout << "Драйвер базы:" << db.driverName().toStdString() << std::endl;
+
+    QSqlQuery query(db);
+    query.prepare("SELECT id FROM chat.users WHERE login = :login AND password_hash = :password");
+    query.bindValue(":login", login);
+    query.bindValue(":password", password);
+
+
+    std::cout << "SQL:" << query.lastQuery().toStdString() << std::endl;
+
+    if (!query.exec()) {
+        std::cerr << "PostgreSQL error: " << query.lastError().nativeErrorCode().toStdString() << std::endl;
+        std::cerr << "Error text: " << query.lastError().text().toStdString() << std::endl;
+        return false;
+    }
+
+    // Если есть хотя бы одна строка — пользователь найден
+    if (query.next()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ChatServer::connectToDatabase() {
+    db = QSqlDatabase::addDatabase("QPSQL");
+    db.setHostName("localhost");
+    db.setDatabaseName("chat_db");
+    db.setUserName("postgres");
+    db.setPassword("123");
+    db.setPort(5432);
+
+    if (!db.open()) {
+        std::cerr << "Ошибка подключения к базе данных:" << db.lastError().text().toStdString() << std::endl;
+        return false;
+    } else {
+        std::cout << "Успешное подключение к базе PostgreSQL!" << std::endl;
+        return true;
+    }
 }
 
 void ChatServer::incomingConnection(qintptr handle) {
@@ -46,7 +95,7 @@ void ChatServer::incomingConnection(qintptr handle) {
                 }
                 break;
             case Auth:
-                if (msg.password == "123") {
+                if (authUser(msg.login, msg.password)) {
                     sendAuthResult(socket, true);
                     auto info2 = new UserInfo();
                     info2->login = msg.login;
