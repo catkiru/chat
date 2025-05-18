@@ -182,9 +182,7 @@ void ChatServer::incomingConnection(qintptr handle) {
 
                 std::cout << "Welcome:" << msg.body.toStdString() << std::endl;
                 break;
-            case Image:
-                std::cerr << "Not implementing yet" << std::endl;
-                break;
+
         }
     });
 
